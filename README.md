@@ -1,6 +1,11 @@
-# spira@0.0.6
+# spira-rs
+SpiraTest API bindings for Rust 🦀
 
-Inflectra Spira Rust Client
+Bindings for SpiraTest v5.4.0.4 which is the version I use at work.
+I developed these in my free time, so I could let other people use them.
+I want to eventually support present day SpiraTest but that is a less pressing matter as we currently don't utilize it.
+
+Contributions are welcome 🙂
 
 ## Usage
 
@@ -42,3 +47,10 @@ Getting a requirement by id
 /// ...
 let requirement: RequirementDto = spira_client.requirement.get(100 /* project_id */, 1500 /* requirement_id */).await?;
 ```
+
+---
+
+## Reference Material
+
+- [SpiraPlan: REST Web Service (v5.0): API Documentation](https://api.inflectra.com/spira/services/v5_0/RestService.aspx)
+- [SpiraPlan: SoapService SOAP Web Service (v5.0): API Documentation](https://api.inflectra.com/Spira/Services/v5_0/SoapService.aspx)
