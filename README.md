@@ -1,7 +1,10 @@
 # spira-rs
 SpiraTest API bindings for Rust 🦀
 
-Bindings for SpiraTest v5.4.0.4 which is the version I use at work.
+This is a fork of [spira by alxolr](https://github.com/alxolr/spira).
+At the time I forked this repo, it hadn't been touched in 2 years and was missing almost all of features that I needed but their code is the basis for this codebase.
+
+Bindings are currently tested for SpiraTest v5.4.0.4 which is the version I use at work.
 I developed these in my free time, so I could let other people use them.
 I want to eventually support present day SpiraTest but that is a less pressing matter as we currently don't utilize it.
 
