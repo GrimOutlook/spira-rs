@@ -30,7 +30,8 @@ type Response<T> = Result<T, Box<dyn std::error::Error>>;
 
 /// ## Usage Example
 /// ```rust
-/// use spira::{resources::project::ProjectDto, SpiraClient};
+/// use spira_rs::{resources::project::ProjectDto, SpiraClient};
+/// use std::env;
 ///
 /// #[tokio::main]
 /// async fn main() -> Result<(), Box<dyn std::error::Error>> {
