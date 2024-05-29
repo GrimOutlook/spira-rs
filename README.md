@@ -31,7 +31,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 ## Documentation
 
-Crate [spira@0.0.6](https://docs.rs/spira/0.0.6/spira/) docs
+Crate [spira-rs@0.1.0](https://docs.rs/spira-rs/0.1.0/) docs
 
 ## Task
 
