@@ -4,7 +4,7 @@ use reqwest::{header::{HeaderMap, HeaderValue}, ClientBuilder, Response};
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
 
-use crate::{project::Project, SupportSpiraVersions};
+use crate::{project::Project, SpiraError, SupportSpiraVersions};
 
 #[cfg(feature = "log")]
 use log::trace;
@@ -18,16 +18,18 @@ pub struct SpiraClient {
 }
 
 impl SpiraClient {
-    pub fn new(base_url: &str, version: SupportSpiraVersions, username: &str, api_key: &str) -> SpiraClient {
-        SpiraClient {
+    pub fn new(base_url: &str, version: SupportSpiraVersions, username: &str, api_key: &str) -> Arc<SpiraClient> {
+        let client = SpiraClient {
             base_url: base_url.into(),
             username: username.into(),
             api_key: api_key.into(),
             version,
-        }
+        };
+
+        return Arc::new(client);
     }
 
-    pub async fn projects(&self) -> reqwest::Result<Vec<Project>> {
+    pub async fn projects(&self) -> Result<Vec<Project>, SpiraError> {
         #[cfg(feature = "log")]
         trace!("Getting projects accessible by user {}", self.username);
 
@@ -37,12 +39,10 @@ impl SpiraClient {
         #[cfg(feature = "log")]
         trace!("Projects response: {}", text);
 
-        let project: Vec<Project> = serde_json::from_str(&text).expect("Error getting response text");
-
-        Ok(project)
+        return Project::projects_from_json(&text, self);
     }
 
-    async fn request(&self, req: &str) -> reqwest::Result<Response> {
+    pub(crate) async fn request(&self, req: &str) -> reqwest::Result<Response> {
         let mut headers = HeaderMap::new();
         
         headers.insert("username", HeaderValue::from_str(&self.username).expect("Username value is invalid"));
