@@ -1,22 +1,20 @@
 use std::sync::Arc;
 
-use serde::{de::DeserializeSeed, Deserialize, Serialize};
+use serde::{de::DeserializeSeed, Deserialize, Deserializer, Serialize};
+use serde_json::Value;
 
-use crate::{client::SpiraClient, client_loader::ClientLoader, SpiraError};
+use chrono::{DateTime, FixedOffset};
 
-#[derive(Serialize, Deserialize, Debug)]
+use crate::{client::SpiraClient, json_value, parse_date, SpiraError};
+use crate::client_container::ClientContainer;
+
+#[derive(Debug)]
 pub struct Project {
-    #[serde(skip_deserializing)]
     pub(crate) client: Arc<SpiraClient>,
-
-    #[serde(rename = "ProjectId")]
     pub(crate) id: u64,
-    #[serde(rename = "Name")]
     pub(crate) name: String,
-    #[serde(rename = "Description")]
     pub(crate) description: String,
-    #[serde(rename = "CreationDate")]
-    pub(crate) creation_date: String,
+    pub(crate) creation_date: DateTime<FixedOffset>,
 }
 
 impl Project {
@@ -36,6 +34,9 @@ impl Project {
 
     // Takes in an array of projects in JSON form.
     pub(crate) fn projects_from_json(json_string: &str, client: &SpiraClient) -> Result<Vec<Project>, SpiraError> {
+
+        // let projects_json: serde_json::Value = serde_json::from_str(json_string)?;
+
         let Ok(projects_json): Result<serde_json::Value,_> = serde_json::from_str(json_string) else {
             return Err(SpiraError::JSONParsingError(format!("Projects JSON is invalid: {}", json_string)))
         };
@@ -56,8 +57,34 @@ impl Project {
 
     // Implement this https://stackoverflow.com/questions/63306229/how-to-pass-options-to-rusts-serde-that-can-be-accessed-in-deserializedeseria
     pub(crate) fn project_from_json(json_string: &str, client: &SpiraClient) -> Result<Project, SpiraError> {
-        todo!();
         let mut deserializer = serde_json::Deserializer::new(serde_json::de::StrRead::new(json_string));
-        // ProjectDeserializer { client }
+        Ok(ProjectDeserializer { client }.deserialize(&mut deserializer)?)
+    }
+}
+
+struct ProjectDeserializer<'a> {
+    client: &'a SpiraClient,
+}
+
+impl<'de> DeserializeSeed<'de> for ProjectDeserializer<'_>
+{
+    type Value = Project;
+
+    fn deserialize<D>(self, deserializer: D) -> Result<Self::Value, D::Error>
+        where
+            D: Deserializer<'de>,
+    {
+
+        let project = &Value::deserialize(deserializer)?;
+
+        let project = Project {
+            client: Arc::from(self.client.clone()),
+            id: json_value("ProjectId", project).as_u64().unwrap(),
+            name: json_value("Name", project).as_str().unwrap().to_string(),
+            description: json_value("Description", project).as_str().unwrap().to_string(),
+            creation_date: parse_date(json_value("CreationDate", project).as_str().unwrap()),
+        };
+
+        Ok(project)
     }
 }
