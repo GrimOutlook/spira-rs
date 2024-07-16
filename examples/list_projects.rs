@@ -17,7 +17,6 @@ async fn main() {
 
     let projects = client.projects().await.unwrap();
     for p in projects {
-        println!("Project ID [{}] is named [{}]", p.id(), p.name());
         println!("Project ID [{}] is named [{}] and has [{}] requirements", p.id(), p.name(), p.requirements_count().await.unwrap());
         let req = p.requirements().await.unwrap();
         let first_req = req.get(0).unwrap();
