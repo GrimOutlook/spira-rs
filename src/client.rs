@@ -33,8 +33,10 @@ impl SpiraClient {
         #[cfg(feature = "log")]
         trace!("Getting projects accessible by user {}", self.username);
 
-        let response = self.request("projects").await?;
-        let text = response.text().await?;
+        let text = self.request("projects")
+            .await?
+            .text()
+            .await?;
 
         #[cfg(feature = "log")]
         trace!("Projects response: {}", text);
@@ -67,17 +69,6 @@ impl SpiraClient {
         match self.version {
             SupportSpiraVersions::V5_0 => "v5_0",
             v => todo!("Version [{:?}] is not currently supported", v),
-        }
-    }
-}
-
-impl Default for SpiraClient {
-    fn default() -> Self {
-        Self {
-            base_url: "".into(),
-            username: "".into(),
-            api_key: "".into(),
-            version: SupportSpiraVersions::V7_0
         }
     }
 }

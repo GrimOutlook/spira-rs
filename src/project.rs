@@ -1,27 +1,54 @@
 use std::sync::Arc;
+use log::trace;
 
 use serde::{de::DeserializeSeed, Deserialize, Deserializer, Serialize};
 use serde_json::Value;
 
-use chrono::{DateTime, FixedOffset};
+use time::OffsetDateTime;
 
 use crate::{client::SpiraClient, json_value, parse_date, SpiraError};
-use crate::client_container::ClientContainer;
+use crate::requirement::Requirement;
 
 #[derive(Debug)]
 pub struct Project {
-    pub(crate) client: Arc<SpiraClient>,
-    pub(crate) id: u64,
-    pub(crate) name: String,
-    pub(crate) description: String,
-    pub(crate) creation_date: DateTime<FixedOffset>,
+    client: Arc<SpiraClient>,
+    id: u64,
+    name: String,
+    description: String,
+    creation_date: OffsetDateTime,
 }
 
 impl Project {
-    pub async fn requirements(&self) {
-        let a = format!("projects/{}/requirements" , self.id);
-        let requirements = self.client.request(&a).await;
-        println!("Reqs: {:?}", requirements.unwrap())
+    pub async fn requirements_count(&self) -> Result<u64, SpiraError> {
+        let request_string = format!("projects/{}/requirements/count" , self.id);
+        let text = self.client.request(&request_string)
+            .await?
+            .text()
+            .await?;
+
+        #[cfg(feature = "log")]
+        trace!("Requirements count response: {}", text);
+
+        Ok(text.parse().unwrap())
+    }
+
+    pub async fn requirements(&self) -> Result<Vec<Requirement>, SpiraError> {
+        // If the starting row is 0 then nothing gets returned. This is not stated in documentation
+        // and confused me for an hour or two. Just leave it at 1.
+        let starting_requirement = 1;
+        let request_text = format!(
+            "projects/{}/requirements?starting_row={}&number_of_rows={}" ,
+            self.id, starting_requirement, self.requirements_count().await?
+        );
+        let response_text = self.client.request(&request_text)
+            .await?
+            .text()
+            .await?;
+
+        #[cfg(feature = "log")]
+        trace!("Requirements response: {}", response_text);
+
+        return Requirement::requirements_from_json(&response_text, &self.client);
     }
     
     pub fn id(&self) -> u64 {
@@ -32,11 +59,8 @@ impl Project {
         &self.name
     }
 
-    // Takes in an array of projects in JSON form.
+    /// Takes in an array of projects in JSON form.
     pub(crate) fn projects_from_json(json_string: &str, client: &SpiraClient) -> Result<Vec<Project>, SpiraError> {
-
-        // let projects_json: serde_json::Value = serde_json::from_str(json_string)?;
-
         let Ok(projects_json): Result<serde_json::Value,_> = serde_json::from_str(json_string) else {
             return Err(SpiraError::JSONParsingError(format!("Projects JSON is invalid: {}", json_string)))
         };
@@ -71,8 +95,7 @@ impl<'de> DeserializeSeed<'de> for ProjectDeserializer<'_>
     type Value = Project;
 
     fn deserialize<D>(self, deserializer: D) -> Result<Self::Value, D::Error>
-        where
-            D: Deserializer<'de>,
+        where D: Deserializer<'de>,
     {
 
         let project = &Value::deserialize(deserializer)?;
@@ -84,6 +107,8 @@ impl<'de> DeserializeSeed<'de> for ProjectDeserializer<'_>
             description: json_value("Description", project).as_str().unwrap().to_string(),
             creation_date: parse_date(json_value("CreationDate", project).as_str().unwrap()),
         };
+
+        println!("{:?}", project);
 
         Ok(project)
     }
