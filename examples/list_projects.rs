@@ -3,6 +3,7 @@ extern crate spira_rs;
 use std::env;
 
 use spira_rs::client::SpiraClient;
+use spira_rs::requirement::Requirement;
 
 #[tokio::main]
 async fn main() {
@@ -17,5 +18,9 @@ async fn main() {
     let projects = client.projects().await.unwrap();
     for p in projects {
         println!("Project ID [{}] is named [{}]", p.id(), p.name());
+        println!("Project ID [{}] is named [{}] and has [{}] requirements", p.id(), p.name(), p.requirements_count().await.unwrap());
+        let req = p.requirements().await.unwrap();
+        let first_req = req.get(0).unwrap();
+        println!("Requirement name: {}. Custom Prop: {:?}", first_req.name(), first_req.custom_properties());
     }
 }

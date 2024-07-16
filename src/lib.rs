@@ -1,10 +1,11 @@
-use chrono::{DateTime, FixedOffset};
+use regex::Regex;
+use time::{OffsetDateTime};
+use time_macros::format_description;
 use serde::{Deserialize, Serialize};
-use crate::project::Project;
 
 pub mod client;
 pub mod project;
-mod client_container;
+pub mod requirement;
 
 #[derive(Clone, Copy, Debug, Deserialize, Serialize)]
 pub enum SupportSpiraVersions {
@@ -38,7 +39,16 @@ pub(crate) fn json_value(key: &str, project: &serde_json::Value) -> serde_json::
     project.get(key).expect(&format!("No {} found in project", key)).clone()
 }
 
-pub(crate) fn parse_date(date_str: &str) -> DateTime<FixedOffset> {
-    return DateTime::parse_from_str(date_str, "%s%3f%z")
+pub(crate) fn parse_date(raw_date_str: &str) -> OffsetDateTime {
+    let re = Regex::new(r"/Date\((\d+[+-]\d+)\)/").unwrap();
+    let date_str = re.captures(raw_date_str)
+            .expect(&format!("Cannot parse date string [{}]", raw_date_str))
+            .get(1)
+            .expect(&format!("Could not find a valid timestamp in [{}]", raw_date_str))
+            .as_str();
+    let format = format_description!(
+        "[unix_timestamp precision:millisecond][offset_hour][offset_minute]"
+    );
+    return OffsetDateTime::parse(date_str, &format)
         .expect(&format!("Cannot parse date from string [{}]", date_str));
 }
