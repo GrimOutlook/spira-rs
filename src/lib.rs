@@ -1,5 +1,5 @@
 use regex::Regex;
-use time::{OffsetDateTime};
+use time::OffsetDateTime;
 use time_macros::format_description;
 use serde::{Deserialize, Serialize};
 

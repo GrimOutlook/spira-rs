@@ -32,6 +32,9 @@ pub struct Requirement {
 }
 
 impl Requirement {
+    /// # Returns
+    /// - Empty `Vec` if no requirements are found in the project.
+    /// - `Vec` populated with requirement that are found in project, if any.
     pub(crate) fn requirements_from_json(json_string: &str, client: &SpiraClient) -> Result<Vec<Requirement>, SpiraError> {
         let Ok(requirements_json): Result<serde_json::Value,_> = serde_json::from_str(json_string) else {
             return Err(SpiraError::JSONParsingError(format!("Requirements JSON is invalid: {}", json_string)))
@@ -51,8 +54,9 @@ impl Requirement {
         return Ok(requirements_vec);
     }
 
-
-    // Implement this https://stackoverflow.com/questions/63306229/how-to-pass-options-to-rusts-serde-that-can-be-accessed-in-deserializedeseria
+    /// # Reference
+    /// I'm very grateful to the user who gave this answer on StackOverflow.
+    /// https://stackoverflow.com/questions/63306229/how-to-pass-options-to-rusts-serde-that-can-be-accessed-in-deserializedeseria
     pub(crate) fn requirement_from_json(json_string: &str, client: &SpiraClient) -> Result<Requirement, SpiraError> {
         let mut deserializer = serde_json::Deserializer::new(serde_json::de::StrRead::new(json_string));
         Ok(RequirementDeserializer { client }.deserialize(&mut deserializer)?)
@@ -141,4 +145,16 @@ pub enum RequirementImportance {
     High = 2,
     Medium = 3,
     Low = 4,
+}
+
+mod tests {
+    #[cfg(test)]
+    fn requirements_from_json() {
+
+    }
+
+    #[cfg(test)]
+    fn requirement_from_json() {
+
+    }
 }

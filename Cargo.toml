@@ -18,6 +18,7 @@ time-macros = { version = "0.2.18", features = ["parsing", "formatting"] }
 
 [dev-dependencies]
 env_logger = "0.11.3"
+httpmock = "0.7.0"
 test-case = "3.3.1"
 
 [features]

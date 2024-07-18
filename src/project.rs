@@ -1,4 +1,6 @@
 use std::sync::Arc;
+use derive_getters::Getters;
+#[cfg(feature = "log")]
 use log::trace;
 
 use serde::{de::DeserializeSeed, Deserialize, Deserializer, Serialize};
@@ -9,7 +11,7 @@ use time::OffsetDateTime;
 use crate::{client::SpiraClient, json_value, parse_date, SpiraError};
 use crate::requirement::Requirement;
 
-#[derive(Debug)]
+#[derive(Debug, Getters)]
 pub struct Project {
     client: Arc<SpiraClient>,
     id: u64,
@@ -50,13 +52,30 @@ impl Project {
 
         return Requirement::requirements_from_json(&response_text, &self.client);
     }
-    
-    pub fn id(&self) -> u64 {
-        self.id
+
+    pub async fn requirement_by_id(&self, requirement_id: u64) -> Result<Option<Requirement>, SpiraError> {
+        let request_text = format!("projects/{}/requirements/{}", self.id, requirement_id);
+        let response_text = self.client.request(&request_text)
+            .await?
+            .text()
+            .await?;
+
+        #[cfg(feature = "log")]
+        trace!("Requirement response: {}", response_text);
+
+        if response_text == "\"Cannot find the supplied requirement id in the system\"" {
+            return Ok(None)
+        }
+
+        let req = Requirement::requirement_from_json(&response_text, &self.client)?;
+        return Ok(Some(req))
     }
 
-    pub fn name(&self) -> &str {
-        &self.name
+    pub async fn requirement_by_name(&self, requirement_name: &str) -> Result<Option<Requirement>, SpiraError> {
+        // There is no way to query the API for a requirement by its name, so we need to just gather
+        // all of them and search for the requirement by name ourselves.
+        let requirements = self.requirements().await?;
+        Ok(requirements.into_iter().find(|r| r.name().eq(&Arc::from(requirement_name))))
     }
 
     /// Takes in an array of projects in JSON form.

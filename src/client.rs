@@ -44,6 +44,31 @@ impl SpiraClient {
         return Project::projects_from_json(&text, self);
     }
 
+    pub async fn project_by_id(&self, project_id: u64) -> Result<Option<Project>, SpiraError> {
+        let request_text = format!("projects/{}", project_id);
+        let response_text = self.request(&request_text)
+            .await?
+            .text()
+            .await?;
+
+        #[cfg(feature = "log")]
+        trace!("Project response: {}", response_text);
+
+        if response_text == "\"Cannot find the supplied project id in the system\"" {
+            return Ok(None)
+        }
+
+        let project = Project::project_from_json(&response_text, &self)?;
+        return Ok(Some(project))
+    }
+
+    pub async fn project_by_name(&self, project_name: &str) -> Result<Option<Project>, SpiraError> {
+        // There is no way to query the API for a project by its name, so we need to just gather
+        // all of them and search for the project by name ourselves.
+        let projects = self.projects().await?;
+        Ok(projects.into_iter().find(|r| r.name().eq(project_name.into())))
+    }
+
     pub(crate) async fn request(&self, req: &str) -> reqwest::Result<Response> {
         let mut headers = HeaderMap::new();
         
@@ -75,9 +100,90 @@ impl SpiraClient {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use httpmock::prelude::*;
+    use serde_json::{json, Value};
+    use crate::client::SpiraClient;
+    use crate::SupportSpiraVersions;
 
-    #[test]
-    fn it_works() {
+    static BASE: &str = "/Services/v5_0/RestService.svc";
+
+    fn get_json_project(name: &str, id: u64) -> Value {
+        json!({
+            "Active": true,
+            "CreationDate":"/Date(1707863960317-0600)/",
+            "Description":"<p>This is a description.</p><p>&nbsp;</p><p>Second line of description</p>",
+            "Name":name,
+            "NonWorkingHours":0,
+            "ProjectId": id,
+            "Website":"",
+            "WorkingDays":5,
+            "WorkingHours":8
+        })
+    }
+
+    #[tokio::test]
+    async fn projects() {
+        let server = MockServer::start();
+
+        server.mock(|when, then| {
+            when.method(GET)
+                .path(format!("{}/projects", BASE));
+            then.status(200)
+                .body(Value::to_string(
+                    &Value::Array(
+                        vec![
+                            get_json_project("Project1", 5),
+                            get_json_project("Project2", 6)
+                            ]
+                        )));
+        });
+        let url = server.url("");
+
+        let client = SpiraClient::new(&*url, SupportSpiraVersions::V5_0, "", "");
+        let projects = client.projects().await.unwrap();
+        assert_eq!(projects.len(), 2);
+        let project = projects.get(0).unwrap();
+        assert_eq!(project.name(), "Project1");
+    }
+
+    #[tokio::test]
+    async fn project_by_id() {
+        let server = MockServer::start();
+
+        server.mock(|when, then| {
+            when.method(GET)
+                .path(format!("{}/projects/5", BASE));
+            then.status(200)
+                .body(Value::to_string(&get_json_project("Project1", 5)));
+        });
+        let url = server.url("");
+
+        let client = SpiraClient::new(&*url, SupportSpiraVersions::V5_0, "", "");
+        let project = client.project_by_id(5).await.unwrap().unwrap();
+        assert_eq!(project.name(), "Project1");
+    }
+
+    #[tokio::test]
+    async fn project_by_name() {
+        let server = MockServer::start();
+
+        server.mock(|when, then| {
+            when.method(GET)
+                .path(format!("{}/projects", BASE));
+            then.status(200)
+                .body(Value::to_string(
+                    &Value::Array(
+                        vec![
+                            get_json_project("Project1", 5),
+                            get_json_project("Project2", 6)
+                            ]
+                        )));
+        });
+        let url = server.url("");
+
+        let client = SpiraClient::new(&*url, SupportSpiraVersions::V5_0, "", "");
+        let project = client.project_by_name("Project2").await.unwrap().unwrap();
+        assert_eq!(project.name(), "Project2");
+        assert_eq!(*project.id(), 6);
     }
 }
