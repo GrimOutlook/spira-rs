@@ -98,6 +98,17 @@ impl SpiraClient {
     }
 }
 
+impl Default for SpiraClient {
+    fn default() -> Self {
+        Self {
+            base_url: Arc::from(""),
+            username: Arc::from(""),
+            api_key: Arc::from(""),
+            version: SupportSpiraVersions::V5_0
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use httpmock::prelude::*;

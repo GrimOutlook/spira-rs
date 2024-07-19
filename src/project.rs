@@ -31,7 +31,7 @@ impl Project {
         #[cfg(feature = "log")]
         trace!("Requirements count response: {}", text);
 
-        Ok(text.parse().unwrap())
+        Ok(text.parse().expect(&format!("Can't parse requirement count: [{}]", text)))
     }
 
     pub async fn requirements(&self) -> Result<Vec<Requirement>, SpiraError> {
@@ -42,6 +42,7 @@ impl Project {
             "projects/{}/requirements?starting_row={}&number_of_rows={}" ,
             self.id, starting_requirement, self.requirements_count().await?
         );
+
         let response_text = self.client.request(&request_text)
             .await?
             .text()
@@ -75,7 +76,7 @@ impl Project {
         // There is no way to query the API for a requirement by its name, so we need to just gather
         // all of them and search for the requirement by name ourselves.
         let requirements = self.requirements().await?;
-        Ok(requirements.into_iter().find(|r| r.name().eq(&Arc::from(requirement_name))))
+        Ok(requirements.into_iter().find(|r| r.name().eq(requirement_name)))
     }
 
     /// Takes in an array of projects in JSON form.
@@ -105,6 +106,18 @@ impl Project {
     }
 }
 
+impl Default for Project {
+    fn default() -> Self {
+        Self {
+            client: Default::default(),
+            id: Default::default(),
+            name: Default::default(),
+            description: Default::default(),
+            creation_date: OffsetDateTime::now_utc()
+        }
+    }
+}
+
 struct ProjectDeserializer<'a> {
     client: &'a SpiraClient,
 }
@@ -127,8 +140,79 @@ impl<'de> DeserializeSeed<'de> for ProjectDeserializer<'_>
             creation_date: parse_date(json_value("CreationDate", project).as_str().unwrap()),
         };
 
-        println!("{:?}", project);
-
         Ok(project)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use httpmock::prelude::*;
+    use serde_json::Value;
+    use crate::client::SpiraClient;
+    use crate::SupportSpiraVersions;
+
+    use super::Project;
+
+    static BASE: &str = "/Services/v5_0/RestService.svc";
+
+    fn get_project(url: String) -> Project {
+        let client = SpiraClient::new(&*url, SupportSpiraVersions::V5_0, "", "");
+        Project {
+            client,
+            id: 5,
+            ..Default::default()
+        }
+    }
+
+    fn get_json_requirement(name: &str, id: u64) -> Value {
+        // Get the requirement JSON from an external file
+        let mut value = serde_json::from_str(include_str!("test_jsons/requirement.json")).unwrap();
+        
+        // We need to be able to modify the JSON for testing purposes. Change the requirement name and ID here.
+        if let Value::Object(v) = &mut value {
+            v.extend([
+                ("Name".to_owned(), name.into()),
+                ("RequirementId".to_owned(), id.into()),
+            ])
+        }
+
+        return value;
+    }
+
+    #[tokio::test]
+    async fn requirements() {
+        let server = MockServer::start();
+
+        let requirements_request = server.mock(|when, then| {
+            when.method(GET)
+                .path(format!("{}/projects/5/requirements", BASE))
+                .query_param("starting_row", "1")
+                .query_param("number_of_rows", "2");
+            then.status(200)
+                .body(Value::to_string(
+                    &Value::Array(
+                        vec![
+                            get_json_requirement("Requirement 1", 5),
+                            get_json_requirement("Requirement 2", 6)
+                        ]
+                    )));
+        });
+
+        // When getting the requirements it has to get the total number first.
+        let count_request = server.mock(|when, then| {
+            when.method(GET)
+                .path(format!("{}/projects/5/requirements/count", BASE));
+            then.status(200)
+                .body("2");
+        });
+        let url = server.url("");
+        let requirements = get_project(url).requirements().await.unwrap();
+        
+        count_request.assert();
+        requirements_request.assert();
+        assert_eq!(requirements.len(), 2);
+        
+        let requirement = requirements.get(0).unwrap();
+        assert_eq!(requirement.name(), "Requirement 1");
     }
 }

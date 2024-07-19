@@ -11,7 +11,7 @@ use crate::{json_value, parse_date, SpiraError};
 #[derive(Clone, Debug, Getters)]
 pub struct Requirement {
     id: u64,
-    indent_level: Option<Arc<str>>,
+    indent_level: Option<String>,
     status: RequirementStatus,
     author_id: u64,
     owner_id: Option<u64>,
@@ -19,14 +19,14 @@ pub struct Requirement {
     release_id: Option<u64>,
     /// The ID of the component the requirement is a part of
     component_id: Option<u64>,
-    name: Arc<str>,
-    description: Option<Arc<str>>,
+    name: String,
+    description: Option<String>,
     creation_date: OffsetDateTime,
     last_updated_date: OffsetDateTime,
     /// Is this a summary requirement or not
     summary: bool,
     /// The version number string of the release that the requirement is scheduled for
-    release_version_number: Option<Arc<str>>,
+    release_version_number: Option<String>,
     project_id: u64,
     custom_properties: Option<Map<String, Value>>
 }
@@ -145,16 +145,4 @@ pub enum RequirementImportance {
     High = 2,
     Medium = 3,
     Low = 4,
-}
-
-mod tests {
-    #[cfg(test)]
-    fn requirements_from_json() {
-
-    }
-
-    #[cfg(test)]
-    fn requirement_from_json() {
-
-    }
 }

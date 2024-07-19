@@ -1,0 +1,228 @@
+{
+    "ArtifactTypeId": 1,
+    "ConcurrencyDate": "/Date(1707864608390-0600)/",
+    "CustomProperties": [
+        {
+            "BooleanValue": null,
+            "DateTimeValue": null,
+            "DecimalValue": null,
+            "Definition": {
+                "ArtifactTypeId": 1,
+                "CustomList": null,
+                "CustomPropertyFieldName": "Custom_01",
+                "CustomPropertyId": 37,
+                "CustomPropertyTypeId": 1,
+                "CustomPropertyTypeName": "Text",
+                "IsDeleted": false,
+                "Name": "Req ID",
+                "Options": [
+                    {
+                        "CustomPropertyOptionId": 1,
+                        "Value": "Y"
+                    },
+                    {
+                        "CustomPropertyOptionId": 4,
+                        "Value": "N"
+                    }
+                ],
+                "ProjectId": 5,
+                "PropertyNumber": 1,
+                "SystemDataType": "System.String"
+            },
+            "IntegerListValue": null,
+            "IntegerValue": null,
+            "PropertyNumber": 1,
+            "StringValue": "ID-001"
+        },
+        {
+            "BooleanValue": null,
+            "DateTimeValue": null,
+            "DecimalValue": null,
+            "Definition": {
+                "ArtifactTypeId": 1,
+                "CustomList": null,
+                "CustomPropertyFieldName": "Custom_02",
+                "CustomPropertyId": 38,
+                "CustomPropertyTypeId": 1,
+                "CustomPropertyTypeName": "Text",
+                "IsDeleted": false,
+                "Name": "DOORS ID",
+                "Options": [
+                    {
+                        "CustomPropertyOptionId": 1,
+                        "Value": "Y"
+                    },
+                    {
+                        "CustomPropertyOptionId": 4,
+                        "Value": "N"
+                    }
+                ],
+                "ProjectId": 5,
+                "PropertyNumber": 2,
+                "SystemDataType": "System.String"
+            },
+            "IntegerListValue": null,
+            "IntegerValue": null,
+            "PropertyNumber": 2,
+            "StringValue": "ID-001"
+        },
+        {
+            "BooleanValue": null,
+            "DateTimeValue": null,
+            "DecimalValue": null,
+            "Definition": {
+                "ArtifactTypeId": 1,
+                "CustomList": null,
+                "CustomPropertyFieldName": "Custom_03",
+                "CustomPropertyId": 39,
+                "CustomPropertyTypeId": 1,
+                "CustomPropertyTypeName": "Text",
+                "IsDeleted": false,
+                "Name": "Seq #",
+                "Options": [
+                    {
+                        "CustomPropertyOptionId": 1,
+                        "Value": "Y"
+                    },
+                    {
+                        "CustomPropertyOptionId": 4,
+                        "Value": "N"
+                    }
+                ],
+                "ProjectId": 5,
+                "PropertyNumber": 3,
+                "SystemDataType": "System.String"
+            },
+            "IntegerListValue": null,
+            "IntegerValue": null,
+            "PropertyNumber": 3,
+            "StringValue": null
+        },
+        {
+            "BooleanValue": null,
+            "DateTimeValue": null,
+            "DecimalValue": null,
+            "Definition": {
+                "ArtifactTypeId": 1,
+                "CustomList": null,
+                "CustomPropertyFieldName": "Custom_04",
+                "CustomPropertyId": 40,
+                "CustomPropertyTypeId": 1,
+                "CustomPropertyTypeName": "Text",
+                "IsDeleted": false,
+                "Name": "Increment",
+                "Options": [
+                    {
+                        "CustomPropertyOptionId": 1,
+                        "Value": "Y"
+                    },
+                    {
+                        "CustomPropertyOptionId": 4,
+                        "Value": "N"
+                    }
+                ],
+                "ProjectId": 5,
+                "PropertyNumber": 4,
+                "SystemDataType": "System.String"
+            },
+            "IntegerListValue": null,
+            "IntegerValue": null,
+            "PropertyNumber": 4,
+            "StringValue": null
+        },
+        {
+            "BooleanValue": null,
+            "DateTimeValue": null,
+            "DecimalValue": null,
+            "Definition": {
+                "ArtifactTypeId": 1,
+                "CustomList": null,
+                "CustomPropertyFieldName": "Custom_05",
+                "CustomPropertyId": 41,
+                "CustomPropertyTypeId": 1,
+                "CustomPropertyTypeName": "Text",
+                "IsDeleted": false,
+                "Name": "Reference",
+                "Options": [
+                    {
+                        "CustomPropertyOptionId": 1,
+                        "Value": "Y"
+                    },
+                    {
+                        "CustomPropertyOptionId": 4,
+                        "Value": "N"
+                    }
+                ],
+                "ProjectId": 5,
+                "PropertyNumber": 5,
+                "SystemDataType": "System.String"
+            },
+            "IntegerListValue": null,
+            "IntegerValue": null,
+            "PropertyNumber": 5,
+            "StringValue": null
+        },
+        {
+            "BooleanValue": null,
+            "DateTimeValue": null,
+            "DecimalValue": null,
+            "Definition": {
+                "ArtifactTypeId": 1,
+                "CustomList": null,
+                "CustomPropertyFieldName": "Custom_11",
+                "CustomPropertyId": 42,
+                "CustomPropertyTypeId": 6,
+                "CustomPropertyTypeName": "List",
+                "IsDeleted": false,
+                "Name": "CCB Status",
+                "Options": [
+                    {
+                        "CustomPropertyOptionId": 1,
+                        "Value": "Y"
+                    }
+                ],
+                "ProjectId": 5,
+                "PropertyNumber": 11,
+                "SystemDataType": "System.Int32"
+            },
+            "IntegerListValue": null,
+            "IntegerValue": null,
+            "PropertyNumber": 11,
+            "StringValue": null
+        }
+    ],
+    "IsAttachments": false,
+    "ProjectId": 5,
+    "AuthorId": 1,
+    "AuthorName": "System Administrator",
+    "ComponentId": null,
+    "CoverageCountBlocked": 5,
+    "CoverageCountCaution": 2,
+    "CoverageCountFailed": 0,
+    "CoverageCountPassed": 7,
+    "CoverageCountTotal": 15,
+    "CreationDate": "/Date(1677289955023-0600)/",
+    "Description": "Description for a requirement",
+    "EstimatePoints": 1.0,
+    "EstimatedEffort": 480,
+    "ImportanceId": null,
+    "ImportanceName": null,
+    "IndentLevel": "AAN",
+    "LastUpdateDate": "/Date(1707864608390-0600)/",
+    "Name": "Name of a requirement",
+    "OwnerId": null,
+    "OwnerName": null,
+    "ProjectName": "req-proj-name",
+    "ReleaseId": null,
+    "ReleaseVersionNumber": null,
+    "RequirementId": 50,
+    "RequirementTypeId": 2,
+    "RequirementTypeName": "Feature",
+    "StatusId": 1,
+    "StatusName": "Requested",
+    "Steps": null,
+    "Summary": false,
+    "TaskActualEffort": null,
+    "TaskCount": 0,
+    "TaskEstimatedEffort": null
+}
